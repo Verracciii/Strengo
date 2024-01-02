@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Strengo",
-    "slug": "Strengo",
+    "name": "StrengoApp",
+    "slug": "StrengoApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
