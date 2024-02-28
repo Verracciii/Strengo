@@ -7,4 +7,8 @@ const config = getDefaultConfig(__dirname, {
   isCSSEnabled: true,
 });
 
+const defaultConfig = getDefaultConfig(__dirname);
+
+defaultConfig.resolver.assetExts.push('db');
+
 module.exports = config;

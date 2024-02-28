@@ -16,6 +16,7 @@ import {
     FlatList} from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import * as Data from '../assets/data.json';
 
 const styles = StyleSheet.create({
 
@@ -77,6 +78,7 @@ const styles = StyleSheet.create({
 })
 
 export default function home() {
+    
     // Initialising the modal states
     // This could possibly be done in a better way and needs to be revisited
     const [modalVisible1, setModalVisible1] = useState(false);
@@ -101,6 +103,16 @@ export default function home() {
                         
                         <Pressable style={styles.templateBox} onPress={() => setModalVisible1(true)}>
                             <Text style={styles.templateText}>Template 1</Text>
+                            <FlatList
+                                data={Data.template1}
+                                renderItem={({ item }) => (
+                                    <View>
+                                        <Text>{item.name}</Text>
+
+                                    </View>
+                                )}
+                                keyExtractor={(item, index) => index}
+                            />
                         </Pressable>
 
                         <Pressable style={styles.templateBox} onPress={() => setModalVisible2(true)}>
