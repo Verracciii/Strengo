@@ -14,9 +14,10 @@ import {
     Modal,
     Image,
     FlatList} from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Data from '../assets/data.json';
+import databaseHelper from '../service/databasehelper.js'
 
 const styles = StyleSheet.create({
 
@@ -85,6 +86,22 @@ export default function home() {
     const [modalVisible2, setModalVisible2] = useState(false);
     const [modalVisible3, setModalVisible3] = useState(false);
     const [modalVisible4, setModalVisible4] = useState(false);
+
+    useEffect(() => {
+        async function testTemplatesAndRead() {
+            await databaseHelper.insertWorkoutTemplate(1, 4, 130, 10, 5, 1)
+            await databaseHelper.insertWorkoutTemplate(1, 1, 100, 10, 5, 1)
+            await databaseHelper.insertWorkoutTemplate(1, 3, 230, 10, 5, 1)
+            const data = await databaseHelper.readTemplates("SELECT * FROM TEMPLATES WHERE ID = 1");
+
+            return data
+        }
+        testTemplatesAndRead().then(data => {
+            console.log("This is the test data", data);
+        });
+        
+    }
+    , []);
 
     return (
         //Use SafeAreaView to avoid the notch on the most new iphones

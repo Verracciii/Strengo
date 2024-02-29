@@ -3,7 +3,7 @@ import test from '../app/test';
 
 const db = SQLite.openDatabase('Strengo.db');
 
-{/* 
+/* 
 Any code regarding await and async in initDatabase is referenced from Github Copilot:
 [Github Copilot: 28/02/2024; 
 Asked: "@workspace After initialising the database and inserting a test data in index.jsx. 
@@ -16,19 +16,42 @@ not actually any of the workouts in the database init method?",
 Should I not place those in the last executeSql statement instead? 
 Where the workouts are inserted? Line 53"]
 
-The use of promises in insertWorkout and ReadDb is not direct code from Github Copilot,
-It is made using the knowledge it gave me about promises and the use of the executeSql method.
-*/}
+Only the use of promises in initDatabase is directly from Copilot, 
+the rest of the promise work is written by me.
+*/
 
+/**
+ * Helper object for interacting with the database.
+ * @typedef {Object} databaseHelper
+ * @property {Function} initDatabase - Initializes the database by creating tables and inserting initial data.
+ * @property {Function} insertWorkout - Inserts a new workout into the Workouts table.
+ * @property {Function} insertWorkoutTemplate - Inserts a new workout template into the Templates table.
+ * @property {Function} readDb - Reads data from the Workouts and Templates tables.
+ * @property {Function} readTemplates - Reads data from the Templates table with a custom SQL query.
+ */
 const databaseHelper = {
   initDatabase: () => {
     return new Promise((resolve, reject) => {
       db.transaction((tx) => {
 
+        /*
+        The 3 SQL statements below are used to delete the tables if they already exist,
+        and then create them again.
+        This is because restarting the app does not clear the database.
+        Each error is caught and logged to the console. A reject() is also called to reject the promise.
+        A resolve() is called at the end of the last executeSql statement in the callback to resolve the promise.
+        */
+
         tx.executeSql(
           "DROP TABLE IF EXISTS Workouts", 
           [], 
           (tx, ResultSet) => {console.log("Workouts table deleted")}, 
+          (tx, error) => {console.warn("Error deleting table, table might not already exist"); reject(error);});
+
+        tx.executeSql(
+          "DROP TABLE IF EXISTS Templates", 
+          [], 
+          (tx, ResultSet) => {console.log("Templates table deleted")}, 
           (tx, error) => {console.warn("Error deleting table, table might not already exist"); reject(error);});
 
         tx.executeSql(
@@ -38,81 +61,159 @@ const databaseHelper = {
           (tx, error) => {console.warn("Error creating table"); reject(error);}
           );
 
-          // Generate an array of workout names
-          const workoutNames = [
-            "Push-ups",
-            "Squats",
-            "Plank",
-            "Bicep Curls",
-            "Lunges",
-            "Deadlifts",
-            "Bench Press",
-            "Crunches",
-            "Shoulder Press",
-            "Leg Press",
-            "Pull-ups",
-            "Chest Flys",
-            "Russian Twists",
-            "Tricep Dips",
-            "Calf Raises"
-          ];
+        /*
+        workoutNames and workoutTypes are both generate by Github Copilot.
+        This was to save time on typing out the names of the workouts and types.
+        */
+        const workoutNames = [
+          "Push-ups",
+          "Squats",
+          "Plank",
+          "Bicep Curls",
+          "Lunges",
+          "Deadlifts",
+          "Bench Press",
+          "Crunches",
+          "Shoulder Press",
+          "Leg Press",
+          "Pull-ups",
+          "Chest Flies",
+          "Russian Twists",
+          "Tricep Dips",
+          "Calf Raises"
+        ];
 
-          // Generate an array of workout types
-          const workoutTypes = [
-            "core",
-            "arms",
-            "shoulders",
-            "legs",
-            "back",
-            "chest"
-          ];
+        const workoutTypes = [
+          "Core",
+          "Arms",
+          "Shoulders",
+          "Legs",
+          "Back",
+          "Chest"
+        ];
 
-          // Insert the workouts into the table
-          workoutNames.forEach((name, index) => {
-            const type = workoutTypes[index % workoutTypes.length];
-            db.transaction((tx) => {
-              tx.executeSql(
-                "INSERT INTO Workouts (name, type) VALUES (?, ?)",
-                [name, type],
-                (tx, ResultSet) => { console.log("Workout inserted"); resolve(); },
-                (tx, error) => { console.warn("Error inserting workout"); reject(error); }
-              );
-            });
-          });
-        }
-      );
-      }
-    );
-    },
+        /*
+        The below lines are also Github Copilot generated.
+        This was to save time on typing out the insertWorkout statements.
+        */
+        databaseHelper.insertWorkout(workoutNames[0], workoutTypes[5]);
+        databaseHelper.insertWorkout(workoutNames[1], workoutTypes[3]);
+        databaseHelper.insertWorkout(workoutNames[2], workoutTypes[0]);
+        databaseHelper.insertWorkout(workoutNames[3], workoutTypes[1]);
+        databaseHelper.insertWorkout(workoutNames[4], workoutTypes[3]);
+        databaseHelper.insertWorkout(workoutNames[5], workoutTypes[4]);
+        databaseHelper.insertWorkout(workoutNames[6], workoutTypes[5]);
+        databaseHelper.insertWorkout(workoutNames[7], workoutTypes[0]);
+        databaseHelper.insertWorkout(workoutNames[8], workoutTypes[2]);
+        databaseHelper.insertWorkout(workoutNames[9], workoutTypes[3]);
+        databaseHelper.insertWorkout(workoutNames[10], workoutTypes[4]);
+        databaseHelper.insertWorkout(workoutNames[11], workoutTypes[5]);
+        databaseHelper.insertWorkout(workoutNames[12], workoutTypes[0]);
+        databaseHelper.insertWorkout(workoutNames[13], workoutTypes[1]);
+        databaseHelper.insertWorkout(workoutNames[14], workoutTypes[3]);
 
+        
+        /*
+        The below code creates the Templates table.
+        The callback has the resolve() function to resolve the promise as it is the last executeSql statement.
+        If there is an error, the reject() function is called to reject the promise.
+        */
+
+          tx.executeSql(
+            "CREATE TABLE IF NOT EXISTS Templates (id INTEGER, workoutId INTEGER, weight INTEGER, reps INTEGER, sets INTEGER, isDefault BOOL, FOREIGN KEY (workoutId) REFERENCES Workouts(id))",
+            [],
+            (tx, ResultSet) => { console.log("Templates table created"); resolve(); },
+            (tx, error) => { console.warn("Error creating Templates table"); reject(error); }
+          );
+      });
+    });
+  },
+
+  /*
+  Takes in a name and type, and inserts a new workout into the Workouts table.
+  The promise is resolved if the workout is inserted successfully, and rejected if there is an error.
+  */
   insertWorkout: (name, type) => {
     return new Promise((resolve, reject) => {
       db.transaction((tx) => { 
         tx.executeSql(
           "INSERT INTO Workouts (name, type) VALUES (?, ?)", 
           [name, type], 
-          (tx, ResultSet) => { console.log("Workout inserted"); resolve(); },
+          (tx, ResultSet) => { console.log(name + " " + type + " inserted"); resolve(); },
           (tx, err) => { console.warn("Error inserting workout", err); reject(err); }
         );
       });
     });
   },
 
-  //[Github Copilot: 28/02/2024; Asked: "How would I make the db readable in console?"]
-  //Excluding the code regarding promises
-  readDb: () => {
-    return new Promise((resolve, reject) => {
+  /*
+  Takes in an id, workoutId, weight, reps, sets, and isDefault, and inserts a new workout template into the Templates table.
+  The promise is resolved if the template is inserted successfully, and rejected if there is an error.
+  */
+  insertWorkoutTemplate: (id, workoutId, weight, reps, sets, isDefault) => {
+    return new Promise((resolve, reject) => { 
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM Workouts",
-          [],
-          (_, { rows: { _array } }) => {console.log(JSON.stringify(_array, null, 2)); resolve();},
-          (_, error) => {reject(error);}
+          "INSERT OR IGNORE INTO Templates (id, workoutId, weight, reps, sets, isDefault) VALUES (?, ?, ?, ?, ?, ?)",
+          [id, workoutId, weight, reps, sets, isDefault],
+          (tx, ResultSet) => { console.log("Template inserted"); resolve(); },
+          (tx, error) => { console.warn("Error inserting template", error); reject(error); }
         )
+      })
+    });
+  },
+
+  /*
+  [Github Copilot: 28/02/2024; Asked: "How would I make the db readable in console?"]
+  Code regarding the reading of the database and promises is written by me.
+  String manipulation and JSON.stringify is used to make the data readable in the console, this is from Copilot.
+  */
+  readDb: (table = "", id = "") => {
+    return new Promise((resolve, reject) => {
+      if (table === "" && id === "") {
+        db.transaction((tx) => {
+          tx.executeSql(
+            "SELECT * FROM Workouts",
+            [],
+            (_, { rows: { _array } }) => {console.log("Reading Workouts table", JSON.stringify(_array, null, 2));},
+            (_, error) => {reject(error);}
+          ),
+          tx.executeSql(
+            "SELECT * FROM Templates",
+            [],
+            (_, { rows: { _array } }) => {console.log("Reading Templates table", JSON.stringify(_array, null, 2)); resolve();},
+            (_, error) => {reject(error);}
+          )
+        });
+      }
+    });
+},
+
+  /*
+  I created a seperate function to read from the Templates table with a custom SQL query rather than
+  using if statements in the readDb function.
+  This is because the readDb function is already quite long, and I wanted to keep it as clean as possible.
+  I also wanted to reduce complexity and make the code more readable.
+  This function takes in a custom SQL query, and reads from the Templates table.
+  */
+  readTemplates: (SQLquery = "") => {
+    return new Promise((resolve, reject) => {
+      if (SQLquery === "") {
+        reject("No SQL query provided");
+
+      } else { 
+
+        db.transaction((tx) => {
+        tx.executeSql(
+          SQLquery,
+          [],
+          (_, { rows: { _array } }) => {console.log("Reading from Templates table with SQLquery \n" + SQLquery, JSON.stringify(_array, null, 2)); resolve(JSON.stringify(_array, null, 2));},
+          (_, error) => {reject(error);}
+        );
       });
     }
-    );
-}
+    });
+  }
 };
 
 export default databaseHelper;
