@@ -21,4 +21,6 @@ There are 3 ways of running the app:
 //If not emulating, download Expo Go on a phone and scan QR
 //If emulating, follow given menu
 
+All work has mainly been done in /app and /services
+
 Github: https://github.com/Verracciii/Strengo
