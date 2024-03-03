@@ -55,7 +55,7 @@ const databaseHelper = {
           (tx, error) => {console.warn("Error deleting table, table might not already exist"); reject(error);});
 
         tx.executeSql(
-          "CREATE TABLE IF NOT EXISTS Workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, type TEXT)", 
+          "CREATE TABLE IF NOT EXISTS Workouts (workoutId INTEGER PRIMARY KEY AUTOINCREMENT, workoutName TEXT, type TEXT)", 
           [], 
           (tx, ResultSet) => {console.log("Workouts table created")},
           (tx, error) => {console.warn("Error creating table"); reject(error);}
@@ -120,7 +120,7 @@ const databaseHelper = {
         */
 
           tx.executeSql(
-            "CREATE TABLE IF NOT EXISTS Templates (id INTEGER, workoutId INTEGER, weight INTEGER, reps INTEGER, sets INTEGER, isDefault BOOL, FOREIGN KEY (workoutId) REFERENCES Workouts(id))",
+            "CREATE TABLE IF NOT EXISTS Templates (templateId INTEGER, templateName TEXT, workoutId INTEGER, weight INTEGER, reps INTEGER, sets INTEGER, isDefault BOOL, FOREIGN KEY (workoutId) REFERENCES Workouts(id))",
             [],
             (tx, ResultSet) => { console.log("Templates table created"); resolve(); },
             (tx, error) => { console.warn("Error creating Templates table"); reject(error); }
@@ -133,13 +133,13 @@ const databaseHelper = {
   Takes in a name and type, and inserts a new workout into the Workouts table.
   The promise is resolved if the workout is inserted successfully, and rejected if there is an error.
   */
-  insertWorkout: (name, type) => {
+  insertWorkout: (workoutName, type) => {
     return new Promise((resolve, reject) => {
       db.transaction((tx) => { 
         tx.executeSql(
-          "INSERT INTO Workouts (name, type) VALUES (?, ?)", 
-          [name, type], 
-          (tx, ResultSet) => { console.log(name + " " + type + " inserted"); resolve(); },
+          "INSERT INTO Workouts (workoutName, type) VALUES (?, ?)", 
+          [workoutName, type], 
+          (tx, ResultSet) => { console.log(workoutName + " " + type + " inserted"); resolve(); },
           (tx, err) => { console.warn("Error inserting workout", err); reject(err); }
         );
       });
@@ -147,15 +147,15 @@ const databaseHelper = {
   },
 
   /*
-  Takes in an id, workoutId, weight, reps, sets, and isDefault, and inserts a new workout template into the Templates table.
+  Takes in an id, name, workoutId, weight, reps, sets, and isDefault, and inserts a new workout template into the Templates table.
   The promise is resolved if the template is inserted successfully, and rejected if there is an error.
   */
-  insertWorkoutTemplate: (id, workoutId, weight, reps, sets, isDefault) => {
+  insertWorkoutTemplate: (templateId, templateName, workoutId, weight, reps, sets, isDefault) => {
     return new Promise((resolve, reject) => { 
       db.transaction((tx) => {
         tx.executeSql(
-          "INSERT OR IGNORE INTO Templates (id, workoutId, weight, reps, sets, isDefault) VALUES (?, ?, ?, ?, ?, ?)",
-          [id, workoutId, weight, reps, sets, isDefault],
+          "INSERT OR IGNORE INTO Templates (templateId, templateName, workoutId, weight, reps, sets, isDefault) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          [templateId, templateName, workoutId, weight, reps, sets, isDefault],
           (tx, ResultSet) => { console.log("Template inserted"); resolve(); },
           (tx, error) => { console.warn("Error inserting template", error); reject(error); }
         )
@@ -203,11 +203,21 @@ const databaseHelper = {
 
       } else { 
 
+        /*
+        The JSON parsing in the resolve() function is from Github Copilot.
+        [Github Copilot: 01/03/2024; 
+        Asked: "@workspace If I hover over item, it says that item: never. 
+        Also the hardcoded data did work. 
+        Here is my readtemplate function aswell. readTemplates:...",
+
+        "Could I do this within the readtemplates function?"]
+        */
+
         db.transaction((tx) => {
         tx.executeSql(
           SQLquery,
           [],
-          (_, { rows: { _array } }) => {console.log("Reading from Templates table with SQLquery \n" + SQLquery, JSON.stringify(_array, null, 2)); resolve(JSON.stringify(_array, null, 2));},
+          (_, { rows: { _array } }) => {console.log("Reading from Templates table with SQLquery \n" + SQLquery, JSON.stringify(_array, null, 2)); resolve(JSON.parse(JSON.stringify(_array, null, 2)));},
           (_, error) => {reject(error);}
         );
       });

@@ -86,22 +86,54 @@ export default function home() {
     const [modalVisible2, setModalVisible2] = useState(false);
     const [modalVisible3, setModalVisible3] = useState(false);
     const [modalVisible4, setModalVisible4] = useState(false);
+    const [template1, setTemplate1] = useState([]);
 
     useEffect(() => {
+        /**
+         * Inserts workout templates into the database and reads all templates.
+         * @returns {Promise<void>}
+         */
         async function testTemplatesAndRead() {
-            await databaseHelper.insertWorkoutTemplate(1, 4, 130, 10, 5, 1)
-            await databaseHelper.insertWorkoutTemplate(1, 1, 100, 10, 5, 1)
-            await databaseHelper.insertWorkoutTemplate(1, 3, 230, 10, 5, 1)
-            const data = await databaseHelper.readTemplates("SELECT * FROM TEMPLATES WHERE ID = 1");
+            //Create template the "pull" template.
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 20, 1, 1);
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 15, 2, 1);
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 10, 3, 1);
 
-            return data
-        }
-        testTemplatesAndRead().then(data => {
-            console.log("This is the test data", data);
-        });
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 8, 1, 1);
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 6, 2, 1);
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 4, 3, 1);
+
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 8, 1, 1);
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 6, 2, 1);
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 4, 3, 1);
+
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 10, 1, 1);
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 8, 2, 1);
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 6, 3, 1);
+
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 12, 30, 8, 1, 1);
+            await databaseHelper.insertWorkoutTemplate(1, "Push", 12, 30, 6, 2, 1);
+
+            //The "push" template.
+            await databaseHelper.insertWorkoutTemplate(2, "Pull", 4, 12, 8, 1, 1);
+            await databaseHelper.insertWorkoutTemplate(2, "Pull", 4, 12, 6, 2, 1);
+
+            await databaseHelper.insertWorkoutTemplate(2, "Pull", 6, 120, 8, 1, 1);
+            await databaseHelper.insertWorkoutTemplate(2, "Pull", 6, 120, 6, 2, 1);
+
+            await databaseHelper.insertWorkoutTemplate(2, "Pull", 11, 0, 8, 1, 1);
+            await databaseHelper.insertWorkoutTemplate(2, "Pull", 11, 0, 6, 2, 1);
+
+            await databaseHelper.readTemplates("SELECT * FROM Templates");
+
+            const tempTemplate1 = await databaseHelper.readTemplates("SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE Templates.templateId = 1");
+            console.log("This is template1" + tempTemplate1);
+            setTemplate1(tempTemplate1);
         
     }
-    , []);
+    
+    testTemplatesAndRead();
+}, []);
 
     return (
         //Use SafeAreaView to avoid the notch on the most new iphones
@@ -121,10 +153,10 @@ export default function home() {
                         <Pressable style={styles.templateBox} onPress={() => setModalVisible1(true)}>
                             <Text style={styles.templateText}>Template 1</Text>
                             <FlatList
-                                data={Data.template1}
+                                data={template1}
                                 renderItem={({ item }) => (
                                     <View>
-                                        <Text>{item.name}</Text>
+                                        <Text>{item.workoutName}</Text>
 
                                     </View>
                                 )}
