@@ -1,0 +1,24 @@
+Strengo is a workout logging app written in React Native.
+It is emulated through Expo CLI for development.
+
+Pre-requisites:
+Visual Studio Code
+Latest version of Node.JS
+
+There are 3 ways of running the app:
+1. Emulate onto iOS. Only available on macOS devices, required setting up emulation and Xcode (seperate guides).
+2. Emulate onto Android. May require extra setup, available on any OS.
+3. Running the app on an iOS/Android device through Expo Go
+(4.) Running it on web. Not recommended, the app is not made for the web.
+
+//Download the project and extract it if zipped
+//Open cmd/terminal and navigate to ../Strengo-main/StrengoApp
+//Run 'npm expo install'
+//Open VSC and open a terminal
+//Run 'npx expo run'
+//If there is a message about outdated expo version, press CTRL + C to terminate session and follow the given instructions
+  //Run again
+//If not emulating, download Expo Go on a phone and scan QR
+//If emulating, follow given menu
+
+Github: https://github.com/Verracciii/Strengo
