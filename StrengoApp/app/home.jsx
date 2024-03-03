@@ -16,7 +16,6 @@ import {
     FlatList} from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import * as Data from '../assets/data.json';
 import databaseHelper from '../service/databasehelper.js'
 
 const styles = StyleSheet.create({
@@ -87,6 +86,7 @@ export default function home() {
     const [modalVisible3, setModalVisible3] = useState(false);
     const [modalVisible4, setModalVisible4] = useState(false);
     const [template1, setTemplate1] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);  //Prevents data from rendering before data is fetched from the database
 
     useEffect(() => {
         /**
@@ -129,11 +129,14 @@ export default function home() {
             const tempTemplate1 = await databaseHelper.readTemplates("SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE Templates.templateId = 1");
             console.log("This is template1" + tempTemplate1);
             setTemplate1(tempTemplate1);
+            setIsLoading(false); //Indicates that the data has been fetched from the database
         
     }
     
     testTemplatesAndRead();
 }, []);
+
+
 
     return (
         //Use SafeAreaView to avoid the notch on the most new iphones
@@ -151,7 +154,15 @@ export default function home() {
                     */}
                         
                         <Pressable style={styles.templateBox} onPress={() => setModalVisible1(true)}>
-                            <Text style={styles.templateText}>Template 1</Text>
+                            {/* 
+                            !isLoading only shows the text component once isLoading is false
+                            template1 {data from template1}
+                            [0]? {the first element in the array, other elements are not needed, only templateName is needed,
+                            ? is used to prevent an error if the array is empty}
+                            templateName {the name of the template}
+                            Will need to reconsider how to do this when there are multiple templates
+                             */}
+                           {!isLoading && <Text style={styles.templateText}>{template1[0]?.templateName}</Text>}
                             <FlatList
                                 data={template1}
                                 renderItem={({ item }) => (
@@ -218,7 +229,7 @@ export default function home() {
                                             style={{height: 25, width: 25}}/>
                                     </Pressable>
 
-                                    <Text style={styles.templateText}>Template 1</Text>
+                                    <Text style={styles.templateText}>{template1[0]?.templateName}</Text>
 
                                     <Text style={styles.templateText}>Start</Text>
                                     
