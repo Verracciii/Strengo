@@ -86,6 +86,7 @@ export default function home() {
     const [modalVisible3, setModalVisible3] = useState(false);
     const [modalVisible4, setModalVisible4] = useState(false);
     const [template1, setTemplate1] = useState([]);
+    const [template2, setTemplate2] = useState([]);
     const [isLoading, setIsLoading] = useState(true);  //Prevents data from rendering before data is fetched from the database
 
     useEffect(() => {
@@ -129,6 +130,11 @@ export default function home() {
             const tempTemplate1 = await databaseHelper.readTemplates("SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE Templates.templateId = 1");
             console.log("This is template1" + tempTemplate1);
             setTemplate1(tempTemplate1);
+
+            const tempTemplate2 = await databaseHelper.readTemplates("SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE Templates.templateId = 2");
+            console.log("This is template2" + tempTemplate2);
+            setTemplate2(tempTemplate2);
+
             setIsLoading(false); //Indicates that the data has been fetched from the database
         
     }
@@ -176,7 +182,17 @@ export default function home() {
                         </Pressable>
 
                         <Pressable style={styles.templateBox} onPress={() => setModalVisible2(true)}>
-                                <Text style={styles.templateText}>Template 2</Text>
+                                {!isLoading && <Text style={styles.templateText}>{template2[0]?.templateName}</Text>}
+                                <FlatList
+                                    data={template2}
+                                    renderItem={({ item }) => (
+                                        <View>
+                                            <Text>{item.workoutName}</Text>
+
+                                        </View>
+                                    )}
+                                    keyExtractor={(item, index) => index}
+                                />
                         </Pressable>
 
                         <Pressable style={styles.templateBox} onPress={() => setModalVisible3(true)}>
@@ -268,7 +284,7 @@ export default function home() {
                                             style={{height: 25, width: 25}}/>
                                     </Pressable>
 
-                                    <Text style={styles.templateText}>Template 2</Text>
+                                    <Text style={styles.templateText}>{template2[0]?.templateName}</Text>
 
                                     <Text style={styles.templateText}>Start</Text>
                                     
