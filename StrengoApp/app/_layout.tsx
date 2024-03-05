@@ -1,4 +1,6 @@
 import { Stack } from "expo-router"
+import HomeScreen from "./home"
+import NewWorkout from "./workout/[template]"
 
 const RootLayout = () => {
 {/* 
@@ -9,9 +11,21 @@ This will hide the header bar from all screens in the app.
 */}
     return (
         <Stack
-        screenOptions={{headerShown: false}}
-        />
-        );
-    };
+            screenOptions={({ route }) => ({
+                headerShown: route.name === "workout/[template]",
+            })}
+        >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="home" />
+            <Stack.Screen 
+            name="workout/[template]" 
+            options={{
+                title: 'Workout', 
+                headerStyle:{backgroundColor: "#4386ff"}, 
+                headerTintColor:'black'
+                }}/>
+        </Stack>
+    );
+}
 
     export default RootLayout;

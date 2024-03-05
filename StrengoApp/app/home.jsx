@@ -13,10 +13,12 @@ import {
     Pressable, 
     Modal,
     Image,
-    FlatList} from 'react-native'
+    FlatList, } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import databaseHelper from '../service/databasehelper.js'
+import { TouchableOpacity } from 'react-native-gesture-handler'
+import { Link, router } from 'expo-router'
 
 const styles = StyleSheet.create({
 
@@ -247,7 +249,20 @@ export default function home() {
 
                                     <Text style={styles.templateText}>{template1[0]?.templateName}</Text>
 
-                                    <Text style={styles.templateText}>Start</Text>
+                                        
+                                    <TouchableOpacity
+                                    onPress={() => {
+                                        setModalVisible1(false);
+                                        console.log("This is template1" + template1);
+                                        router.push({
+                                            pathname: '/workout/[template]',
+                                            params: { templateId: 1 }
+                                        });
+                                    }}>
+
+                                        <Text style={styles.templateText}>Start</Text>
+
+                                    </TouchableOpacity>
                                     
                                 </View>
 
