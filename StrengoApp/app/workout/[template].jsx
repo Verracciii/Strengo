@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
+import databaseHelper from '../../service/databasehelper'
 
 const styles = StyleSheet.create({
     topBar: {
@@ -31,7 +32,22 @@ const styles = StyleSheet.create({
     }
 })
 
-const Workout = (template) => {
+
+const WorkoutRow = (template, templateId) => {
+        
+        return (
+            pass
+        )
+    }
+
+const Workout = (template, templateId) => {
+    
+    return (
+        pass
+    )
+}
+
+const WorkoutList = (template, templateId) => {
 
     return (
         <View style={{
@@ -50,6 +66,21 @@ export default function newWorkout() {
     const { templateId } = useLocalSearchParams()
     console.log("[template] SearchParams template " + templateId)
 
+    const [template, setTemplate] = useState([])
+
+    useEffect(() => {
+        async function getTemplate() {
+            const tempTemplate = await databaseHelper.readTemplates(
+                "SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE templateId = ?", 
+                templateId
+                )
+            setTemplate(tempTemplate)
+    }
+
+    getTemplate()
+
+    }, []);
+
     return (
 
         <View>
@@ -58,7 +89,7 @@ export default function newWorkout() {
             </View>
 
             <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start', alignItems: 'center' }}>
-                <Workout />
+                <WorkoutList />
             </ScrollView>
         </View>
     )

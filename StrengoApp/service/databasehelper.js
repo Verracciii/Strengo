@@ -196,7 +196,7 @@ const databaseHelper = {
   I also wanted to reduce complexity and make the code more readable.
   This function takes in a custom SQL query, and reads from the Templates table.
   */
-  readTemplates: (SQLquery = "") => {
+  readTemplates: (SQLquery = "", ...args) => {
     return new Promise((resolve, reject) => {
       if (SQLquery === "") {
         reject("No SQL query provided");
@@ -216,7 +216,7 @@ const databaseHelper = {
         db.transaction((tx) => {
         tx.executeSql(
           SQLquery,
-          [],
+          args,
           (_, { rows: { _array } }) => {console.log("Reading from Templates table with SQLquery \n" + SQLquery, JSON.stringify(_array, null, 2)); resolve(JSON.parse(JSON.stringify(_array, null, 2)));},
           (_, error) => {reject(error);}
         );
