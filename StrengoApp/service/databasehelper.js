@@ -61,6 +61,13 @@ const databaseHelper = {
           (tx, error) => {console.warn("Error creating table"); reject(error);}
           );
 
+        tx.executeSql(
+          "DROP TABLE IF EXISTS operatingValues",
+          [],
+          (tx, ResultSet) => {console.log("operatingValues table deleted")},
+          (tx, error) => {console.warn("Error deleting table, table might not already exist"); reject(error);}
+          );
+
         /*
         workoutNames and workoutTypes are both generate by Github Copilot.
         This was to save time on typing out the names of the workouts and types.
@@ -122,9 +129,20 @@ const databaseHelper = {
           tx.executeSql(
             "CREATE TABLE IF NOT EXISTS Templates (templateId INTEGER, templateName TEXT, workoutId INTEGER, weight INTEGER, reps INTEGER, sets INTEGER, isDefault BOOL, FOREIGN KEY (workoutId) REFERENCES Workouts(id))",
             [],
-            (tx, ResultSet) => { console.log("Templates table created"); resolve(); },
+            (tx, ResultSet) => { console.log("Templates table created"); },
             (tx, error) => { console.warn("Error creating Templates table"); reject(error); }
           );
+
+          tx.executeSql(
+            "CREATE TABLE IF NOT EXISTS operatingValues (id INTEGER PRIMARY KEY AUTOINCREMENT, name STRING, value BOOLEAN)",
+            [],
+            (tx, ResultSet) => { console.log("operatingValues table created"); resolve(); },
+            (tx, error) => { console.warn("Error creating operatingValues table"); reject(error); }
+          );
+
+          databaseHelper.insertOperatingValue("dbInit", 1);
+          databaseHelper.insertOperatingValue("templatesInit", 0);
+
       });
     });
   },
@@ -212,18 +230,50 @@ const databaseHelper = {
 
         "Could I do this within the readtemplates function?"]
         */
+       //console.log("Reading from Templates table with SQLquery \n" + SQLquery, JSON.stringify(_array, null, 2)); 
 
         db.transaction((tx) => {
         tx.executeSql(
           SQLquery,
           args,
-          (_, { rows: { _array } }) => {console.log("Reading from Templates table with SQLquery \n" + SQLquery, JSON.stringify(_array, null, 2)); resolve(JSON.parse(JSON.stringify(_array, null, 2)));},
+          (_, { rows: { _array } }) => {resolve(JSON.parse(JSON.stringify(_array, null, 2)));},
           (_, error) => {reject(error);}
         );
       });
     }
     });
+  },
+  
+  readOperatingValues: (SQLquery = "", ...args) => {
+    return new Promise((resolve, reject) => {
+      if (SQLquery === "") {
+        reject("No SQL query provided");
+      } else {
+        db.transaction((tx) => {
+          tx.executeSql(
+            SQLquery,
+            args,
+            (_, { rows: { _array } }) => {console.log("Reading from operatingValues table with SQLquery \n" + SQLquery, JSON.stringify(_array, null, 2));resolve(JSON.parse(JSON.stringify(_array, null, 2)));},
+            (_, error) => {reject(error);}
+          );
+        });
+      }
+    });
+  },
+
+  insertOperatingValue: (name, value) => {
+    return new Promise((resolve, reject) => {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "INSERT OR IGNORE INTO operatingValues (name, value) VALUES (?, ?)",
+          [name, value],
+          (tx, ResultSet) => {console.log("Operating value inserted"); resolve();},
+          (tx, error) => {console.warn("Error inserting operating value", error); reject(error);}
+        );
+      });
+    });
   }
 };
+
 
 export default databaseHelper;

@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'expo-router'
 import databaseHelper from '../service/databasehelper.js'
 
@@ -25,7 +25,10 @@ const styles = StyleSheet.create({
 })
 
 
+
 export default function Index() {
+
+  const [dbInit, setDbInit] = useState(false)
 
   //Github copilot gave me the knowledge to fix my error regarding using async functions in useEffect
   //The previous error was that await functions returned a promise, and useEffect does not support promises/returning anything (except clean up)
@@ -34,11 +37,20 @@ export default function Index() {
   //The [] at the end of useEffect is an empty dependency array, this means that the useEffect will only run once, when the component mounts.
   useEffect(() => {
     async function asyncInitDb() {
-      await databaseHelper.initDatabase()
-      await databaseHelper.insertWorkout("HELLO???", "Strength")
-      databaseHelper.readDb()
+
+      try {
+        if (databaseHelper.databaseHelper.readOperatingValues("SELECT value FROM operatingValues WHERE name = 'dbInit'") === 0) {
+          await databaseHelper.initDatabase()
+          databaseHelper.readDb()
+        }
+      } catch (TypeError) {
+        console.log("DB not initialised")
+        await databaseHelper.initDatabase()
+        databaseHelper.readDb()
+      }
     }
-    asyncInitDb();
+
+      asyncInitDb();
   }, []);
 
   return (

@@ -97,37 +97,42 @@ export default function home() {
          * @returns {Promise<void>}
          */
         async function testTemplatesAndRead() {
-            //Create template the "pull" template.
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 20, 1, 1);
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 15, 2, 1);
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 10, 3, 1);
+            const templatesInit = await databaseHelper.readOperatingValues("SELECT value FROM operatingValues WHERE name = 'templatesInit'");
 
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 8, 1, 1);
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 6, 2, 1);
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 4, 3, 1);
+            if (templatesInit[0].value === 0) {
 
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 8, 1, 1);
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 6, 2, 1);
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 4, 3, 1);
+                //Create template the "pull" template.
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 20, 1, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 15, 2, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 10, 3, 1);
 
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 10, 1, 1);
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 8, 2, 1);
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 6, 3, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 8, 1, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 6, 2, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 4, 3, 1);
 
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 12, 30, 8, 1, 1);
-            await databaseHelper.insertWorkoutTemplate(1, "Push", 12, 30, 6, 2, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 8, 1, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 6, 2, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 4, 3, 1);
 
-            //The "push" template.
-            await databaseHelper.insertWorkoutTemplate(2, "Pull", 4, 12, 8, 1, 1);
-            await databaseHelper.insertWorkoutTemplate(2, "Pull", 4, 12, 6, 2, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 10, 1, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 8, 2, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 6, 3, 1);
 
-            await databaseHelper.insertWorkoutTemplate(2, "Pull", 6, 120, 8, 1, 1);
-            await databaseHelper.insertWorkoutTemplate(2, "Pull", 6, 120, 6, 2, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 12, 30, 8, 1, 1);
+                await databaseHelper.insertWorkoutTemplate(1, "Push", 12, 30, 6, 2, 1);
 
-            await databaseHelper.insertWorkoutTemplate(2, "Pull", 11, 0, 8, 1, 1);
-            await databaseHelper.insertWorkoutTemplate(2, "Pull", 11, 0, 6, 2, 1);
+                //The "push" template.
+                await databaseHelper.insertWorkoutTemplate(2, "Pull", 4, 12, 8, 1, 1);
+                await databaseHelper.insertWorkoutTemplate(2, "Pull", 4, 12, 6, 2, 1);
 
-            await databaseHelper.readTemplates("SELECT * FROM Templates");
+                await databaseHelper.insertWorkoutTemplate(2, "Pull", 6, 120, 8, 1, 1);
+                await databaseHelper.insertWorkoutTemplate(2, "Pull", 6, 120, 6, 2, 1);
+
+                await databaseHelper.insertWorkoutTemplate(2, "Pull", 11, 0, 8, 1, 1);
+                await databaseHelper.insertWorkoutTemplate(2, "Pull", 11, 0, 6, 2, 1);
+
+                await databaseHelper.readOperatingValues("UPDATE operatingValues SET value = 1 WHERE name = 'templatesInit'");
+            }
 
             const tempTemplate1 = await databaseHelper.readTemplates("SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE Templates.templateId = 1");
             console.log("This is template1" + tempTemplate1);

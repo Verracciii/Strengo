@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
                 workoutFinishButton: {
 
                     backgroundColor: 'green',
-                    width: '20%',
+                    width: '10%',
                     height: '95%',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -92,8 +92,42 @@ const styles = StyleSheet.create({
     }
 })
 
+/*
+[Github Copilot: 07/03/2024 asked:
+"@workspace I have written 3 components (correct me if im wrong), workoutlist, workout, workoutrow. 
+They are children of each other respecitvely. My SQL data [template] contains all the info for the template. 
+I want to pass this data to the components. 
+I want workout list to then iterate over and create a workout for each workout and then workout creates a workoutrow for each set in the data. 
+How would I begin the process of this iteration?"
 
-const WorkoutRow = (template, templateId) => {
+"This is the structure of the data: [ { "templateId": 1, "templateName": "Push", "workoutId": 1, "weight": 0, "reps": 20, "sets": 1, "isDefault": 1, "workoutName": "Push-ups", "type": "Chest" }, { "templateId": 1, "templateName": "Push", "workoutId": 1, "weight": 0, "reps": 15, "sets": 2, "isDefault": 1, "workoutName": "Push-ups", "type": "Chest" }, ... ]"
+]
+transformData function is from Github Copilot. It will allow me to map() over the array to iterate creating workouts.
+*/
+function transformData(data) {
+    // Group by templateId, then by workoutId
+    const grouped = data.reduce((acc, item) => {
+      if (!acc[item.templateId]) {
+        acc[item.templateId] = {};
+      }
+      if (!acc[item.templateId][item.workoutId]) {
+        acc[item.templateId][item.workoutId] = [];
+      }
+      acc[item.templateId][item.workoutId].push(item);
+      return acc;
+    }, {});
+  
+    // Transform into array of templates, each with an array of workouts, each with an array of sets
+    return Object.entries(grouped).map(([templateId, workouts]) => ({
+      templateId,
+      workouts: Object.entries(workouts).map(([workoutId, sets]) => ({
+        workoutId,
+        sets,
+      })),
+    }));
+  }
+
+const WorkoutRow = (set, templateId) => {
         
         return (
             <View style={styles.workout.workoutBox.workoutRow}>
@@ -101,36 +135,47 @@ const WorkoutRow = (template, templateId) => {
                     <Text style={styles.workout.workoutBox.workoutRow.workoutNo.workoutNoText}>1</Text>
                 </View>
                 <View style={styles.workout.workoutBox.workoutRow.workoutInput}>
-
+                    <Text>{set.reps} reps</Text>
                 </View>
                 <View style={styles.workout.workoutBox.workoutRow.workoutInput}>
-                    
+                    <Text>{set.weight} kg</Text>
                 </View>
                 <View style={styles.workout.workoutBox.workoutRow.workoutFinishButton}>
-                    <Text style={styles.workout.workoutBox.workoutRow.workoutFinishButton.workoutFinishButtonText}>Finish</Text>
                 </View>
 
             </View>
         )
     }
 
-const Workout = (template, templateId) => {
+const Workout = (workout, templateId, key) => {
     
+    console.warn("Workout with params \nworkout: ", workout, " \nkey: ", key);
+
     return (
         <View>
-            <WorkoutRow template={template} templateiD={templateId}/>
+            <View style={styles.workout.workoutBox.workoutTitleBox}>
+                <Text style={styles.workout.workoutBox.workoutTitleBox.workoutTitle}>
+                    Squats
+                </Text>
+            </View>
+            {workout.sets.map((set, key) => (
+                <workoutRow key={key} set={set} />
+            ))}
         </View>
     )
 }
 
 const WorkoutList = (template, templateId) => {
 
+    console.log("WorkoutList run with following params: \ntemplate: ", template);
     return (
         <ScrollView style={{
             flexDirection: 'column',
         }}>
-
-            <Workout template={template} templateId={templateId} />
+            {template && template.workouts && template.workouts.map((workout, index) => (
+                <Workout workout={workout} key={index} />
+            ))}
+            
 
         </ScrollView>
 
@@ -140,7 +185,6 @@ const WorkoutList = (template, templateId) => {
 export default function newWorkout() {
 
     const { templateId } = useLocalSearchParams()
-    console.log("[template] SearchParams template " + templateId)
 
     const [template, setTemplate] = useState([])
 
@@ -149,8 +193,12 @@ export default function newWorkout() {
             const tempTemplate = await databaseHelper.readTemplates(
                 "SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE templateId = ?", 
                 templateId
-                )
-            setTemplate(tempTemplate)
+                );
+            if (tempTemplate.length === 0) {
+                console.warn("No template found with id: ", templateId);
+                return;
+            }
+            setTemplate(transformData(tempTemplate))
     }
 
     getTemplate()
@@ -171,18 +219,24 @@ export default function newWorkout() {
                 <View style={{
                     flexDirection: 'row',
                     justifyContent: 'space-around',
-                    paddingLeft: '15%',
-                    paddingRight: '30%',
+                    paddingHorizontal: '20%',
                     width:'100%',
                     alignItems: 'center',
                     }}>
+
                     <Text>Reps</Text>
                     <Text>Sets</Text>
+                    
                 </View>
 
             </View>
 
-            <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start', alignItems: 'center', flexDirection: "column" }}>
+            <ScrollView contentContainerStyle={{ 
+                flexGrow: 1, 
+                justifyContent: 'flex-start', 
+                alignItems: 'center', 
+                flexDirection: "column" 
+                }}>
                 <WorkoutList template={template} templateId={templateId}/>
             </ScrollView>
         </View>
