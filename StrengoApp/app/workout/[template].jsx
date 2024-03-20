@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
@@ -73,8 +73,8 @@ const styles = StyleSheet.create({
                 workoutFinishButton: {
 
                     backgroundColor: 'green',
-                    width: '10%',
-                    height: '95%',
+                    width: 'auto',
+                    height: 'auto',
                     justifyContent: 'center',
                     alignItems: 'center',
 
@@ -119,6 +119,10 @@ function transformData(data) {
 
     return Object.values(grouped);
 }
+async function finishWorkout(templateId, weight, reps, set, workoutId) {
+    const d = new Date().toDateString();
+    await databaseHelper.customQuery("INSERT INTO WorkoutHistory (templateId, date, weight, reps, set, workoutId) VALUES (?, ?, ?, ?, ?, ?)", templateId, d, weight, reps, set, workoutId)
+}
 
 const WorkoutRow = (set, templateId) => {
     console.log("entering WorkoutRow set: ", set);
@@ -129,7 +133,7 @@ const WorkoutRow = (set, templateId) => {
         return (
             <View style={styles.workout.workoutBox.workoutRow}>
                 <View style={styles.workout.workoutBox.workoutRow.workoutNo}>
-                    <Text style={styles.workout.workoutBox.workoutRow.workoutNo.workoutNoText}>1</Text>
+                    <Text style={styles.workout.workoutBox.workoutRow.workoutNo.workoutNoText}>{set.set.sets}</Text>
                 </View>
 
                 <View style={styles.workout.workoutBox.workoutRow.workoutInput}>
@@ -142,8 +146,11 @@ const WorkoutRow = (set, templateId) => {
 
                 <TouchableOpacity 
                 style={styles.workout.workoutBox.workoutRow.workoutFinishButton}
-                onPress={{}}
+                onPress={() =>
+                    finishWorkout(set.set.templateId, set.set.weight, set.set.reps, set.set.sets, set.set.workoutId)
+                }
                 >
+                    <Image source={require('../../assets/images/checkmark.jpeg')} style={{height: 25, width:25}} />
                 </TouchableOpacity>
 
             </View>
@@ -206,7 +213,7 @@ export default function newWorkout() {
             console.log("tempTemplate: ", tempTemplate);
             console.log("template.workouts: ", tempTemplate.workouts);
             setTemplate(transformData(tempTemplate));
-            console.log("transformData(tempTemplate): ", transformData(tempTemplate));
+            
 
 
     }
@@ -233,8 +240,8 @@ export default function newWorkout() {
                     alignItems: 'center',
                     }}>
 
+                    <Text>Weight</Text>
                     <Text>Reps</Text>
-                    <Text>Sets</Text>
                     
                 </View>
 

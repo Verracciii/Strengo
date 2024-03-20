@@ -67,6 +67,18 @@ const databaseHelper = {
           (tx, error) => {console.warn("Error deleting table, table might not already exist"); reject(error);}
           );
 
+        tx.executeSql("DROP TABLE IF EXISTS WorkoutHistory",
+          [],
+          (tx, ResultSet) => {console.log("WorkoutHistory table deleted")},
+          (tx, error) => {console.warn("Error deleting table, table might not already exist"); reject(error);}
+          );
+
+        tx.executeSql("CREATE TABLE IF NOT EXISTS WorkoutHistory (id INTEGER PRIMARY KEY AUTOINCREMENT, templateId INTEGER, date TEXT, weight INTEGER, reps INTEGER, set INTEGER, workoutId INTEGER, FOREIGN KEY (templateId) REFERENCES Templates(templateId), FOREIGN KEY (workoutId) REFERENCES Workouts(workoutId))",
+          [],
+          (tx, ResultSet) => {console.log("WorkoutHistory table created")},
+          (tx, error) => {console.warn("Error creating table"); reject(error);}
+          );
+
         /*
         workoutNames and workoutTypes are both generate by Github Copilot.
         This was to save time on typing out the names of the workouts and types.
@@ -270,6 +282,23 @@ const databaseHelper = {
           (tx, error) => {console.warn("Error inserting operating value", error); reject(error);}
         );
       });
+    });
+  },
+
+  customQuery: (SQLquery = "", ...args) => {
+    return new Promise((resolve, reject) => {
+      if (SQLquery === "") {
+        reject("No SQL query provided");
+      } else {
+        db.transaction((tx) => {
+          tx.executeSql(
+            SQLquery,
+            args,
+            (_, { rows: { _array } }) => {console.log("Custom query executed with SQLquery \n" + SQLquery, JSON.stringify(_array, null, 2));resolve(JSON.parse(JSON.stringify(_array, null, 2)));},
+            (_, error) => {reject(error);}
+          );
+        });
+      }
     });
   }
 };
