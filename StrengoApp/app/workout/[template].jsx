@@ -1,6 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import databaseHelper from '../../service/databasehelper'
@@ -103,81 +102,84 @@ How would I begin the process of this iteration?"
 "This is the structure of the data: [ { "templateId": 1, "templateName": "Push", "workoutId": 1, "weight": 0, "reps": 20, "sets": 1, "isDefault": 1, "workoutName": "Push-ups", "type": "Chest" }, { "templateId": 1, "templateName": "Push", "workoutId": 1, "weight": 0, "reps": 15, "sets": 2, "isDefault": 1, "workoutName": "Push-ups", "type": "Chest" }, ... ]"
 ]
 transformData function is from Github Copilot. It will allow me to map() over the array to iterate creating workouts.
+Any mention of map() in relation to rendering the components is from Github Copilot.
 */
 function transformData(data) {
-    // Group by templateId, then by workoutId
     const grouped = data.reduce((acc, item) => {
-      if (!acc[item.templateId]) {
-        acc[item.templateId] = {};
-      }
-      if (!acc[item.templateId][item.workoutId]) {
-        acc[item.templateId][item.workoutId] = [];
-      }
-      acc[item.templateId][item.workoutId].push(item);
-      return acc;
+        if (!acc[item.workoutId]) {
+            acc[item.workoutId] = {
+                workoutId: item.workoutId,
+                workoutName: item.workoutName,
+                sets: []
+            };
+        }
+        acc[item.workoutId].sets.push(item);
+        return acc;
     }, {});
-  
-    // Transform into array of templates, each with an array of workouts, each with an array of sets
-    return Object.entries(grouped).map(([templateId, workouts]) => ({
-      templateId,
-      workouts: Object.entries(workouts).map(([workoutId, sets]) => ({
-        workoutId,
-        sets,
-      })),
-    }));
-  }
+
+    return Object.values(grouped);
+}
 
 const WorkoutRow = (set, templateId) => {
+    console.log("entering WorkoutRow set: ", set);
         
+    const [reps, setReps] = useState("")
+    const [weight, setWeight] = useState("")
+
         return (
             <View style={styles.workout.workoutBox.workoutRow}>
                 <View style={styles.workout.workoutBox.workoutRow.workoutNo}>
                     <Text style={styles.workout.workoutBox.workoutRow.workoutNo.workoutNoText}>1</Text>
                 </View>
+
                 <View style={styles.workout.workoutBox.workoutRow.workoutInput}>
-                    <Text>{set.reps} reps</Text>
+                    <Text>{set.set.reps}</Text>
                 </View>
+
                 <View style={styles.workout.workoutBox.workoutRow.workoutInput}>
-                    <Text>{set.weight} kg</Text>
+                    <Text>{set.set.weight}</Text>
                 </View>
-                <View style={styles.workout.workoutBox.workoutRow.workoutFinishButton}>
-                </View>
+
+                <TouchableOpacity 
+                style={styles.workout.workoutBox.workoutRow.workoutFinishButton}
+                onPress={{}}
+                >
+                </TouchableOpacity>
 
             </View>
         )
     }
 
-const Workout = (workout, templateId, key) => {
-    
-    console.warn("Workout with params \nworkout: ", workout, " \nkey: ", key);
-
+const Workout = ({ workout }) => {
+    console.log("entering Workout workout: ", workout);
     return (
         <View>
             <View style={styles.workout.workoutBox.workoutTitleBox}>
                 <Text style={styles.workout.workoutBox.workoutTitleBox.workoutTitle}>
-                    Squats
+                    {workout.workoutName}
                 </Text>
             </View>
             {workout.sets.map((set, key) => (
-                <workoutRow key={key} set={set} />
+                <WorkoutRow key={key} set={set} />
             ))}
         </View>
     )
 }
 
-const WorkoutList = (template, templateId) => {
-
-    console.log("WorkoutList run with following params: \ntemplate: ", template);
+const WorkoutList = ({ template }) => {
+    console.log("entering WorkoutList template: ", template);
+    console.log("template.workouts: ", template.workouts);
     return (
-        <ScrollView style={{
+        <View style={{
             flexDirection: 'column',
+            height: 'auto',
         }}>
-            {template && template.workouts && template.workouts.map((workout, index) => (
+            {template && template.map((workout, index) => (
                 <Workout workout={workout} key={index} />
             ))}
             
 
-        </ScrollView>
+        </View>
 
     )
 }
@@ -190,6 +192,9 @@ export default function newWorkout() {
 
     useEffect(() => {
         async function getTemplate() {
+            console.log("\nRunning async function getTemplate() in useEffect\n");
+            console.log("templateId: ", templateId);
+
             const tempTemplate = await databaseHelper.readTemplates(
                 "SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE templateId = ?", 
                 templateId
@@ -198,16 +203,20 @@ export default function newWorkout() {
                 console.warn("No template found with id: ", templateId);
                 return;
             }
-            setTemplate(transformData(tempTemplate))
+            console.log("tempTemplate: ", tempTemplate);
+            console.log("template.workouts: ", tempTemplate.workouts);
+            setTemplate(transformData(tempTemplate));
+            console.log("transformData(tempTemplate): ", transformData(tempTemplate));
+
+
     }
 
-    getTemplate()
-
+    getTemplate();
     }, []);
 
     return (
 
-        <View>
+        <View style={{ flex:1 }}>
             <View style={styles.topBar}>
                 <View style={{
                     width: '100%',
@@ -231,11 +240,12 @@ export default function newWorkout() {
 
             </View>
 
-            <ScrollView contentContainerStyle={{ 
-                flexGrow: 1, 
+            <ScrollView contentContainerStyle={{
+                flexGrow: 1,  
                 justifyContent: 'flex-start', 
                 alignItems: 'center', 
-                flexDirection: "column" 
+                flexDirection: "column",
+                height: 'auto', 
                 }}>
                 <WorkoutList template={template} templateId={templateId}/>
             </ScrollView>

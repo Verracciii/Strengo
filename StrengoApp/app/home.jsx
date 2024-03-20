@@ -14,11 +14,11 @@ import {
     Modal,
     Image,
     FlatList, } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import databaseHelper from '../service/databasehelper.js'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { Link, router } from 'expo-router'
+import { router } from 'expo-router'
+import { StrengoContext } from '../global/AppContext.js'
 
 const styles = StyleSheet.create({
 
@@ -87,111 +87,48 @@ export default function home() {
     const [modalVisible2, setModalVisible2] = useState(false);
     const [modalVisible3, setModalVisible3] = useState(false);
     const [modalVisible4, setModalVisible4] = useState(false);
-    const [template1, setTemplate1] = useState([]);
-    const [template2, setTemplate2] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);  //Prevents data from rendering before data is fetched from the database
-
-    useEffect(() => {
-        /**
-         * Inserts workout templates into the database and reads all templates.
-         * @returns {Promise<void>}
-         */
-        async function testTemplatesAndRead() {
-            const templatesInit = await databaseHelper.readOperatingValues("SELECT value FROM operatingValues WHERE name = 'templatesInit'");
-
-            if (templatesInit[0].value === 0) {
-
-                //Create template the "pull" template.
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 20, 1, 1);
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 15, 2, 1);
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 1, 0, 10, 3, 1);
-
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 8, 1, 1);
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 6, 2, 1);
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 7, 55, 4, 3, 1);
-
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 8, 1, 1);
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 6, 2, 1);
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 9, 25, 4, 3, 1);
-
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 10, 1, 1);
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 8, 2, 1);
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 14, 25, 6, 3, 1);
-
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 12, 30, 8, 1, 1);
-                await databaseHelper.insertWorkoutTemplate(1, "Push", 12, 30, 6, 2, 1);
-
-                //The "push" template.
-                await databaseHelper.insertWorkoutTemplate(2, "Pull", 4, 12, 8, 1, 1);
-                await databaseHelper.insertWorkoutTemplate(2, "Pull", 4, 12, 6, 2, 1);
-
-                await databaseHelper.insertWorkoutTemplate(2, "Pull", 6, 120, 8, 1, 1);
-                await databaseHelper.insertWorkoutTemplate(2, "Pull", 6, 120, 6, 2, 1);
-
-                await databaseHelper.insertWorkoutTemplate(2, "Pull", 11, 0, 8, 1, 1);
-                await databaseHelper.insertWorkoutTemplate(2, "Pull", 11, 0, 6, 2, 1);
-
-                await databaseHelper.readOperatingValues("UPDATE operatingValues SET value = 1 WHERE name = 'templatesInit'");
-            }
-
-            const tempTemplate1 = await databaseHelper.readTemplates("SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE Templates.templateId = 1");
-            console.log("This is template1" + tempTemplate1);
-            setTemplate1(tempTemplate1);
-
-            const tempTemplate2 = await databaseHelper.readTemplates("SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE Templates.templateId = 2");
-            console.log("This is template2" + tempTemplate2);
-            setTemplate2(tempTemplate2);
-
-            setIsLoading(false); //Indicates that the data has been fetched from the database
-        
-    }
+    const {
+        template1,
+        setTemplate1,
+        template2,
+        setTemplate2,
+        isLoading,
+        setIsLoading,
+      } = useContext(StrengoContext);
     
-    testTemplatesAndRead();
-}, []);
-
-
+      if (isLoading) {
+        return <Text>Loading...</Text>;
+      }
 
     return (
-        //Use SafeAreaView to avoid the notch on the most new iphones
-        <SafeAreaView style={{
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center' 
-                }}>
+        <StrengoContext.Provider value={{ template1, template2, isLoading }}>
+            {/*Use SafeAreaView to avoid the notch on the most new iphone*/}
+            <SafeAreaView style={{
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center' 
+                    }}>
 
-                <View style={styles.templateContainer}>
+                    <View style={styles.templateContainer}>
 
-                    {/* 
-                    These are the pressable boxes for the templates. 
-                    They are all coupled with their associated modal. 
-                    */}
-                        
-                        <Pressable style={styles.templateBox} onPress={() => setModalVisible1(true)}>
-                            {/* 
-                            !isLoading only shows the text component once isLoading is false
-                            template1 {data from template1}
-                            [0]? {the first element in the array, other elements are not needed, only templateName is needed,
-                            ? is used to prevent an error if the array is empty}
-                            templateName {the name of the template}
-                            Will need to reconsider how to do this when there are multiple templates
-                             */}
-                           {!isLoading && <Text style={styles.templateText}>{template1[0]?.templateName}</Text>}
-                            <FlatList
-                                data={template1}
-                                renderItem={({ item }) => (
-                                    <View>
-                                        <Text>{item.workoutName}</Text>
-
-                                    </View>
-                                )}
-                                keyExtractor={(item, index) => index}
-                            />
-                        </Pressable>
-
-                        <Pressable style={styles.templateBox} onPress={() => setModalVisible2(true)}>
-                                {!isLoading && <Text style={styles.templateText}>{template2[0]?.templateName}</Text>}
+                        {/* 
+                        These are the pressable boxes for the templates. 
+                        They are all coupled with their associated modal.
+                        */}
+                            
+                            <Pressable style={styles.templateBox} onPress={() => setModalVisible1(true)}>
+                                {/* 
+                                !isLoading only shows the text component once isLoading is false
+                                template1 {data from template1}
+                                [0]? {the first element in the array, other elements are not needed, only templateName is needed,
+                                ? is used to prevent an error if the array is empty}
+                                templateName {the name of the template}
+                                Will need to reconsider how to do this when there are multiple templates
+                                */}
+                            {!isLoading && <Text style={styles.templateText}>{template1[0]?.templateName}</Text>}
+                            {template2 ? (
                                 <FlatList
-                                    data={template2}
+                                    data={template1}
                                     renderItem={({ item }) => (
                                         <View>
                                             <Text>{item.workoutName}</Text>
@@ -200,197 +137,219 @@ export default function home() {
                                     )}
                                     keyExtractor={(item, index) => index}
                                 />
-                        </Pressable>
+                            ) : (
+                                <Text>Loading...</Text>
+                            )}
+                            </Pressable>
 
-                        <Pressable style={styles.templateBox} onPress={() => setModalVisible3(true)}>
-                                <Text style={styles.templateText}>Template 3</Text>
-                        </Pressable>
+                            <Pressable style={styles.templateBox} onPress={() => setModalVisible2(true)}>
+                                    {!isLoading && <Text style={styles.templateText}>{template2[0]?.templateName}</Text>}
+                                {template2 ? (
+                                    <FlatList
+                                        data={template2}
+                                        renderItem={({ item }) => (
+                                            <View>
+                                                <Text>{item.workoutName}</Text>
 
-                        <Pressable style={styles.templateBox} onPress={() => setModalVisible4(true)}>
-                                <Text style={styles.templateText}>Template 4</Text>
-                        </Pressable>
+                                            </View>
+                                        )}
+                                        keyExtractor={(item, index) => index}
+                                    />
+                                ) : (
+                                    <Text>Loading...</Text>
+                                )}
+                            </Pressable>
 
-                </View>
-                    
-                    {/*
-                    These are the modals for the templates.
-                    I need to look into a more efficient and clean way to code this part.
-                    For now this is the solution.
-                    */}
+                            <Pressable style={styles.templateBox} onPress={() => setModalVisible3(true)}>
+                                    <Text style={styles.templateText}>Template 3</Text>
+                            </Pressable>
 
-                    {/*
-                    onRequestClose only has effect on Andriod devices.
-                    This is to handle the hardware back button.
-                    This has no effect on iOS.
-                    */}
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible1}
-                        onRequestClose={() => {
-                        Alert.alert("Modal has been closed."); 
-                        setModalVisible1(!modalVisible1);
-                        }}
-                    >
-                        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                            <View style={styles.modalView}>
+                            <Pressable style={styles.templateBox} onPress={() => setModalVisible4(true)}>
+                                    <Text style={styles.templateText}>Template 4</Text>
+                            </Pressable>
 
-                                <View style={
-                                    {
-                                        flexDirection: 'row',
-                                        gap: 75,
-                                        display: "flex",
-                                        width: "100%", 
-                                        height: "auto", 
-                                        marginBottom: "5%", 
-                                        marginTop: "5%",
+                    </View>
+                        
+                        {/*
+                        These are the modals for the templates.
+                        I need to look into a more efficient and clean way to code this part.
+                        For now this is the solution.
+                        */}
+
+                        {/*
+                        onRequestClose only has effect on Andriod devices.
+                        This is to handle the hardware back button.
+                        This has no effect on iOS.
+                        */}
+                        <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalVisible1}
+                            onRequestClose={() => {
+                            Alert.alert("Modal has been closed."); 
+                            setModalVisible1(!modalVisible1);
+                            }}
+                        >
+                            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                                <View style={styles.modalView}>
+
+                                    <View style={
+                                        {
+                                            flexDirection: 'row',
+                                            gap: 75,
+                                            display: "flex",
+                                            width: "100%", 
+                                            height: "auto", 
+                                            marginBottom: "5%", 
+                                            marginTop: "5%",
+                                            }}>
+
+                                        <Pressable onPress={() => setModalVisible1(false)}>
+                                            <Image source={
+                                                require("../assets/images/x_icon.png")} 
+                                                style={{height: 25, width: 25}}/>
+                                        </Pressable>
+
+                                        <Text style={styles.templateText}>{template1[0]?.templateName}</Text>
+
+                                            
+                                        <TouchableOpacity
+                                        onPress={() => {
+                                            setModalVisible1(false);
+                                            console.log("This is template1" + template1);
+                                            router.push({
+                                                pathname: '/workout/[template]',
+                                                params: { templateId: 1 }
+                                            });
                                         }}>
 
-                                    <Pressable onPress={() => setModalVisible1(false)}>
-                                        <Image source={
-                                            require("../assets/images/x_icon.png")} 
-                                            style={{height: 25, width: 25}}/>
-                                    </Pressable>
+                                            <Text style={styles.templateText}>Start</Text>
 
-                                    <Text style={styles.templateText}>{template1[0]?.templateName}</Text>
-
+                                        </TouchableOpacity>
                                         
-                                    <TouchableOpacity
-                                    onPress={() => {
-                                        setModalVisible1(false);
-                                        console.log("This is template1" + template1);
-                                        router.push({
-                                            pathname: '/workout/[template]',
-                                            params: { templateId: 1 }
-                                        });
-                                    }}>
+                                    </View>
+
+                                </View>
+                            </View>
+                        </Modal>
+
+                        <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalVisible2}
+                            onRequestClose={() => {
+                            Alert.alert("Modal has been closed.");
+                            setModalVisible2(!modalVisible2);
+                            }}
+                        >
+                            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                                <View style={styles.modalView}>
+
+                                    <View style={
+                                        {
+                                            flexDirection: 'row',
+                                            gap: 75,
+                                            display: "flex",
+                                            width: "100%", 
+                                            height: "auto", 
+                                            marginBottom: "5%", 
+                                            marginTop: "5%",
+                                            }}>
+
+                                        <Pressable onPress={() => setModalVisible2(false)}>
+                                            <Image source={
+                                                require("../assets/images/x_icon.png")} 
+                                                style={{height: 25, width: 25}}/>
+                                        </Pressable>
+
+                                        <Text style={styles.templateText}>{template2[0]?.templateName}</Text>
 
                                         <Text style={styles.templateText}>Start</Text>
+                                        
+                                    </View>
 
-                                    </TouchableOpacity>
-                                    
                                 </View>
-
                             </View>
-                        </View>
-                    </Modal>
+                        </Modal>
 
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible2}
-                        onRequestClose={() => {
-                        Alert.alert("Modal has been closed.");
-                        setModalVisible2(!modalVisible2);
-                        }}
-                    >
-                        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                            <View style={styles.modalView}>
+                        <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalVisible3}
+                            onRequestClose={() => {
+                            Alert.alert("Modal has been closed.");
+                            setModalVisible3(!modalVisible3);
+                            }}
+                        >
+                            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                                <View style={styles.modalView}>
 
-                                <View style={
-                                    {
-                                        flexDirection: 'row',
-                                        gap: 75,
-                                        display: "flex",
-                                        width: "100%", 
-                                        height: "auto", 
-                                        marginBottom: "5%", 
-                                        marginTop: "5%",
-                                        }}>
+                                    <View style={
+                                        {
+                                            flexDirection: 'row',
+                                            gap: 75,
+                                            display: "flex",
+                                            width: "100%", 
+                                            height: "auto", 
+                                            marginBottom: "5%", 
+                                            marginTop: "5%",
+                                            }}>
 
-                                    <Pressable onPress={() => setModalVisible2(false)}>
-                                        <Image source={
-                                            require("../assets/images/x_icon.png")} 
-                                            style={{height: 25, width: 25}}/>
-                                    </Pressable>
+                                        <Pressable onPress={() => setModalVisible3(false)}>
+                                            <Image source={
+                                                require("../assets/images/x_icon.png")} 
+                                                style={{height: 25, width: 25}}/>
+                                        </Pressable>
 
-                                    <Text style={styles.templateText}>{template2[0]?.templateName}</Text>
+                                        <Text style={styles.templateText}>Template 3</Text>
 
-                                    <Text style={styles.templateText}>Start</Text>
-                                    
+                                        <Text style={styles.templateText}>Start</Text>
+                                        
+                                    </View>
+
                                 </View>
-
                             </View>
-                        </View>
-                    </Modal>
+                        </Modal>
 
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible3}
-                        onRequestClose={() => {
-                        Alert.alert("Modal has been closed.");
-                        setModalVisible3(!modalVisible3);
-                        }}
-                    >
-                        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                            <View style={styles.modalView}>
+                        <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalVisible4}
+                            onRequestClose={() => {
+                            Alert.alert("Modal has been closed.");
+                            setModalVisible4(!modalVisible4);
+                            }}
+                        >
+                            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                                <View style={styles.modalView}>
 
-                                <View style={
-                                    {
-                                        flexDirection: 'row',
-                                        gap: 75,
-                                        display: "flex",
-                                        width: "100%", 
-                                        height: "auto", 
-                                        marginBottom: "5%", 
-                                        marginTop: "5%",
-                                        }}>
+                                    <View style={
+                                        {
+                                            flexDirection: 'row',
+                                            gap: 75,
+                                            display: "flex",
+                                            width: "100%", 
+                                            height: "auto", 
+                                            marginBottom: "5%", 
+                                            marginTop: "5%",
+                                            }}>
 
-                                    <Pressable onPress={() => setModalVisible3(false)}>
-                                        <Image source={
-                                            require("../assets/images/x_icon.png")} 
-                                            style={{height: 25, width: 25}}/>
-                                    </Pressable>
+                                        <Pressable onPress={() => setModalVisible4(false)}>
+                                            <Image source={
+                                                require("../assets/images/x_icon.png")} 
+                                                style={{height: 25, width: 25}}/>
+                                        </Pressable>
 
-                                    <Text style={styles.templateText}>Template 3</Text>
+                                        <Text style={styles.templateText}>Template 4</Text>
 
-                                    <Text style={styles.templateText}>Start</Text>
-                                    
+                                        <Text style={styles.templateText}>Start</Text>
+                                        
+                                    </View>
+
                                 </View>
-
                             </View>
-                        </View>
-                    </Modal>
-
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible4}
-                        onRequestClose={() => {
-                        Alert.alert("Modal has been closed.");
-                        setModalVisible4(!modalVisible4);
-                        }}
-                    >
-                        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                            <View style={styles.modalView}>
-
-                                <View style={
-                                    {
-                                        flexDirection: 'row',
-                                        gap: 75,
-                                        display: "flex",
-                                        width: "100%", 
-                                        height: "auto", 
-                                        marginBottom: "5%", 
-                                        marginTop: "5%",
-                                        }}>
-
-                                    <Pressable onPress={() => setModalVisible4(false)}>
-                                        <Image source={
-                                            require("../assets/images/x_icon.png")} 
-                                            style={{height: 25, width: 25}}/>
-                                    </Pressable>
-
-                                    <Text style={styles.templateText}>Template 4</Text>
-
-                                    <Text style={styles.templateText}>Start</Text>
-                                    
-                                </View>
-
-                            </View>
-                        </View>
-                    </Modal>
-        </SafeAreaView>
+                        </Modal>
+            </SafeAreaView>
+        </StrengoContext.Provider>
     )
 }

@@ -1,5 +1,4 @@
 import * as SQLite from 'expo-sqlite';
-import test from '../app/test';
 
 const db = SQLite.openDatabase('Strengo.db');
 
@@ -194,13 +193,13 @@ const databaseHelper = {
             "SELECT * FROM Workouts",
             [],
             (_, { rows: { _array } }) => {console.log("Reading Workouts table", JSON.stringify(_array, null, 2));},
-            (_, error) => {reject(error);}
+            (_, error) => {console.log("Error reading workouts table => readDb");reject(error);}
           ),
           tx.executeSql(
             "SELECT * FROM Templates",
             [],
             (_, { rows: { _array } }) => {console.log("Reading Templates table", JSON.stringify(_array, null, 2)); resolve();},
-            (_, error) => {reject(error);}
+            (_, error) => {console.log("Error reading templates table => readDb");reject(error);}
           )
         });
       }
@@ -236,7 +235,7 @@ const databaseHelper = {
         tx.executeSql(
           SQLquery,
           args,
-          (_, { rows: { _array } }) => {resolve(JSON.parse(JSON.stringify(_array, null, 2)));},
+          (_, { rows: { _array } }) => {resolve(JSON.parse(JSON.stringify(_array, null, 2))); console.log("Reading from Templates table with SQLquery \n" + SQLquery, JSON.stringify(_array, null, 2));},
           (_, error) => {reject(error);}
         );
       });
