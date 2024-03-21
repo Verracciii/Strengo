@@ -73,7 +73,7 @@ const databaseHelper = {
           (tx, error) => {console.warn("Error deleting table, table might not already exist"); reject(error);}
           );
 
-        tx.executeSql("CREATE TABLE IF NOT EXISTS WorkoutHistory (id INTEGER PRIMARY KEY AUTOINCREMENT, templateId INTEGER, date TEXT, weight INTEGER, reps INTEGER, set INTEGER, workoutId INTEGER, FOREIGN KEY (templateId) REFERENCES Templates(templateId), FOREIGN KEY (workoutId) REFERENCES Workouts(workoutId))",
+        tx.executeSql("CREATE TABLE IF NOT EXISTS WorkoutHistory (id INTEGER PRIMARY KEY AUTOINCREMENT, templateId INTEGER, date TEXT, weight INTEGER, reps INTEGER, sets INTEGER, workoutId INTEGER, FOREIGN KEY (templateId) REFERENCES Templates(templateId), FOREIGN KEY (workoutId) REFERENCES Workouts(workoutId))",
           [],
           (tx, ResultSet) => {console.log("WorkoutHistory table created")},
           (tx, error) => {console.warn("Error creating table"); reject(error);}
@@ -212,7 +212,17 @@ const databaseHelper = {
             [],
             (_, { rows: { _array } }) => {console.log("Reading Templates table", JSON.stringify(_array, null, 2)); resolve();},
             (_, error) => {console.log("Error reading templates table => readDb");reject(error);}
-          )
+          ),
+          tx.executeSql("SELECT * FROM operatingValues",
+            [],
+            (_, { rows: { _array } }) => {console.log("Reading operatingValues table", JSON.stringify(_array, null, 2));},
+            (_, error) => {console.log("Error reading operatingValues table => readDb");reject(error);}
+          ),
+          tx.executeSql("SELECT * FROM WorkoutHistory",
+            [],
+            (_, { rows: { _array } }) => {console.log("Reading WorkoutHistory table", JSON.stringify(_array, null, 2));},
+            (_, error) => {console.log("Error reading WorkoutHistory table => readDb");reject(error);}
+          );
         });
       }
     });
@@ -295,7 +305,7 @@ const databaseHelper = {
             SQLquery,
             args,
             (_, { rows: { _array } }) => {console.log("Custom query executed with SQLquery \n" + SQLquery, JSON.stringify(_array, null, 2));resolve(JSON.parse(JSON.stringify(_array, null, 2)));},
-            (_, error) => {reject(error);}
+            (_, error) => {reject(error); console.log("Error executing custom query", error);}
           );
         });
       }

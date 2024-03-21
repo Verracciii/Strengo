@@ -8,12 +8,18 @@ const StrengoProvider = ({children}) => {
 
     async function asyncInitDb() {
 
+
+
         try {
             const dbInitVal = await databaseHelper.readOperatingValues("SELECT value FROM operatingValues WHERE name = 'dbInit'");
         
             if (dbInitVal === 0) {
                 await databaseHelper.initDatabase()
                 databaseHelper.readDb()
+            } else {
+                console.log("Database already initialised");
+                await databaseHelper.initDatabase()
+                await databaseHelper.readDb()
             }
             } catch (error) {
             console.log("DB not initialised or other error occurred:", error);

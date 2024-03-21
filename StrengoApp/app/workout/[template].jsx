@@ -121,7 +121,8 @@ function transformData(data) {
 }
 async function finishWorkout(templateId, weight, reps, set, workoutId) {
     const d = new Date().toDateString();
-    await databaseHelper.customQuery("INSERT INTO WorkoutHistory (templateId, date, weight, reps, set, workoutId) VALUES (?, ?, ?, ?, ?, ?)", templateId, d, weight, reps, set, workoutId)
+    await databaseHelper.customQuery("INSERT INTO WorkoutHistory (templateId, date, weight, reps, sets, workoutId) VALUES (?, ?, ?, ?, ?, ?)", templateId, d, weight, reps, set, workoutId)
+    await databaseHelper.customQuery("SELECT * FROM WorkoutHistory")
 }
 
 const WorkoutRow = (set, templateId) => {
