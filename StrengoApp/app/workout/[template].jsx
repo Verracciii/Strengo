@@ -119,6 +119,7 @@ function transformData(data) {
 
     return Object.values(grouped);
 }
+
 async function finishWorkout(templateId, weight, reps, set, workoutId) {
     const d = new Date().toDateString();
     await databaseHelper.customQuery("INSERT INTO WorkoutHistory (templateId, date, weight, reps, sets, workoutId) VALUES (?, ?, ?, ?, ?, ?)", templateId, d, weight, reps, set, workoutId)
@@ -128,8 +129,11 @@ async function finishWorkout(templateId, weight, reps, set, workoutId) {
 const WorkoutRow = (set, templateId) => {
     console.log("entering WorkoutRow set: ", set);
         
-    const [reps, setReps] = useState("")
-    const [weight, setWeight] = useState("")
+    const [reps, setReps] = useState(set.set.reps)
+    const [weight, setWeight] = useState(set.set.weight)
+
+    console.log("reps: ", reps);
+    console.log("weight: ", weight);
 
         return (
             <View style={styles.workout.workoutBox.workoutRow}>
@@ -138,18 +142,34 @@ const WorkoutRow = (set, templateId) => {
                 </View>
 
                 <View style={styles.workout.workoutBox.workoutRow.workoutInput}>
-                    <Text>{set.set.reps}</Text>
+                    <TextInput 
+                    returnKeyType='next'
+                    textAlign='center'
+                    inputMode='numeric'
+                    defaultValue={set.set.weight.toString()}
+                    onChangeText={(text) => setWeight(text)}
+                    />
                 </View>
 
                 <View style={styles.workout.workoutBox.workoutRow.workoutInput}>
-                    <Text>{set.set.weight}</Text>
+                <TextInput 
+                    returnKeyType='next'
+                    textAlign='center'
+                    inputMode='numeric'
+                    defaultValue={set.set.reps.toString()}
+                    onChangeText={(text) => setReps(text)}
+                    />
                 </View>
 
                 <TouchableOpacity 
                 style={styles.workout.workoutBox.workoutRow.workoutFinishButton}
-                onPress={() =>
-                    finishWorkout(set.set.templateId, set.set.weight, set.set.reps, set.set.sets, set.set.workoutId)
-                }
+                onPress={() =>{
+                    if (reps === "" && weight === "") {
+                        finishWorkout(set.set.templateId, set.set.weight, set.set.reps, set.set.sets, set.set.workoutId)
+                    } else {
+                        finishWorkout(set.set.templateId, Number(weight), Number(reps), set.set.sets, set.set.workoutId)
+                    }
+                }}
                 >
                     <Image source={require('../../assets/images/checkmark.jpeg')} style={{height: 25, width:25}} />
                 </TouchableOpacity>
@@ -253,9 +273,34 @@ export default function newWorkout() {
                 justifyContent: 'flex-start', 
                 alignItems: 'center', 
                 flexDirection: "column",
-                height: 'auto', 
+                height: 'auto',
+                paddingBottom: 85, 
                 }}>
                 <WorkoutList template={template} templateId={templateId}/>
+
+                <View style={{
+                    width: '100%',
+                    height: '10%',
+                    justifyContent: 'center',
+                    alignItems: 'center',}}>
+                    <TouchableOpacity style={{
+                        backgroundColor:'green',
+                        height:'75%%',
+                        width: '75%',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '25'}}>
+                        <View>
+                            <Text style={{
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                color: 'white'}}>
+                                Finish Workout
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+
             </ScrollView>
         </View>
     )
