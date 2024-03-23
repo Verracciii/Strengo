@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import databaseHelper from '../../service/databasehelper'
+import { router } from 'expo-router'
 
 const styles = StyleSheet.create({
     topBar: {
@@ -289,7 +290,15 @@ export default function newWorkout() {
                         width: '75%',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        borderRadius: '25'}}>
+                        borderRadius: '25'}} 
+
+                        onPress={() => {
+                            console.log("templateId in onPress: ", templateId);
+                            router.replace({
+                                pathname: 'workout/workoutFinished/[workoutFinished]',
+                                params: {templateId: templateId}
+                            })
+                        }}>
                         <View>
                             <Text style={{
                                 fontSize: 20,

@@ -25,7 +25,7 @@ This will hide the header bar from all screens in the app.
                     headerStyle:{backgroundColor: "#4386ff"}, 
                     headerTintColor:'black'
                     }}/>
-                <Stack.Screen name="workout/workoutFinished" />
+                <Stack.Screen name="workout/workoutFinished/[workoutFinished]" />
             </Stack>
         </StrengoProvider>
     );
