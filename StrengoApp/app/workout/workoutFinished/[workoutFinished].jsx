@@ -1,6 +1,6 @@
-import { View, Text, FlatList, StyleSheet } from 'react-native'
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { useLocalSearchParams, router } from 'expo-router'
+import { useLocalSearchParams, router, Link } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import databaseHelper from '../../../service/databasehelper'
 
@@ -17,21 +17,34 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
   },
+
   workoutFinished: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingBottom: 10,
+
     text: {
       fontSize: 20,
       fontWeight: 'bold',
     }
   },
+
   workoutName: {
     fontSize: 15
   },
 
+  doneButton: {
+    borderWidth: 2,
+    borderColor: 'black',
+    borderRadius: 10,
+    backgroundColor: 'green',
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
 
 })
 
@@ -60,9 +73,12 @@ export default function workoutFinished () {
     <SafeAreaView style={{
       flex: 1,
       flexDirection: 'column',
-      justifyContent: 'center',
+      justifyContent: 'space-between',
       alignItems: 'center',
     }}>
+
+      
+
       <View style={styles.container}>
 
         <View style={styles.workoutFinished}>
@@ -80,9 +96,16 @@ export default function workoutFinished () {
             keyExtractor={item => item.id}
             scrollEnabled={false} />
       
-
-
       </View>
+
+      <Link href='/home' asChild>
+        <TouchableOpacity>
+          <View style={styles.doneButton}>
+            <Text style={{fontWeight: 'bold', color: 'white'}}>Done</Text>
+          </View>
+        </TouchableOpacity>
+      </Link>
+
     </SafeAreaView>
   )
 }

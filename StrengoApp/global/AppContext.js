@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react' 
 import { useEffect, useState } from 'react'
 import databaseHelper from '../service/databasehelper';
 
@@ -19,7 +19,6 @@ const StrengoProvider = ({children}) => {
             } else {
                 console.log("Database already initialised");
                 await databaseHelper.initDatabase()
-                await databaseHelper.readDb()
             }
             } catch (error) {
             console.log("DB not initialised or other error occurred:", error);
@@ -79,11 +78,9 @@ const StrengoProvider = ({children}) => {
             }
 
             const tempTemplate1 = await databaseHelper.readTemplates("SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE Templates.templateId = 1");
-            console.log("This is template1" + tempTemplate1);
             setTemplate1(tempTemplate1);
 
             const tempTemplate2 = await databaseHelper.readTemplates("SELECT * FROM Templates INNER JOIN Workouts ON Templates.workoutId = Workouts.workoutId WHERE Templates.templateId = 2");
-            console.log("This is template2" + tempTemplate2);
             setTemplate2(tempTemplate2);
 
             setIsLoading(false); //Indicates that the data has been fetched from the database

@@ -14,7 +14,7 @@ This will hide the header bar from all screens in the app.
         <StrengoProvider>
             <Stack
                 screenOptions={({ route }) => ({
-                    headerShown: route.name === "workout/[template]",
+                    headerShown: route.name === "workout/[template]" || route.name === 'history',
                 })}>
                 <Stack.Screen name="index" />
                 <Stack.Screen name="home" />
@@ -25,7 +25,9 @@ This will hide the header bar from all screens in the app.
                     headerStyle:{backgroundColor: "#4386ff"}, 
                     headerTintColor:'black'
                     }}/>
-                <Stack.Screen name="workout/workoutFinished/[workoutFinished]" />
+                <Stack.Screen name="workout/workoutFinished/[workoutFinished]"
+                options={{gestureEnabled: false}} />
+                <Stack.Screen name="history" />
             </Stack>
         </StrengoProvider>
     );

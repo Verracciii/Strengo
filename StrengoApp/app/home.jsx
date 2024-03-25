@@ -17,8 +17,9 @@ import {
 import React, { useContext, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { router } from 'expo-router'
+import { Link, router } from 'expo-router'
 import { StrengoContext } from '../global/AppContext.js'
+import databaseHelper from '../service/databasehelper.js'
 
 const styles = StyleSheet.create({
 
@@ -28,26 +29,31 @@ const styles = StyleSheet.create({
                 display: 'flex', 
                 alignItems: 'flex-start', 
                 justifyContent: 'center', 
-                backgroundColor: 'red',
+                backgroundColor: '#d6d6d4',
                 borderColor: 'black',
                 borderWidth: 5,
                 width: '90%',
-                height: '80%',
+                height: 'auto',
                 marginTop: 150,
                 flexWrap: 'wrap',
                 gap: 10,
-                paddingTop: 10,
+                padding: 10,
+                borderRadius: 25
         },
         templateBox: {
                 display: 'flex', 
                 alignItems: 'flex-start', 
                 justifyContent: 'flex-start', 
-                backgroundColor: 'green',
+                backgroundColor: 'white',
                 borderColor: 'black',
-                borderWidth: 5,
+                borderWidth: 2,
                 width: '45%',
-                height: '25%',
+                height: 'auto',
+                maxHeight: 175,
                 margin: 1,
+                borderRadius: 25,
+                paddingBottom: 11,
+                padding: 10
         },
         headerText: {
                 fontSize: 30,
@@ -64,10 +70,11 @@ const styles = StyleSheet.create({
             marginTop: "5%",
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: "orange",
+            backgroundColor: "grey",
             borderRadius: 5,
             width: "80%",
             height: "auto",
+            paddingHorizontal: 20,
         },
         pressableBox: {
             display: 'flex',
@@ -75,7 +82,20 @@ const styles = StyleSheet.create({
             justifyContent: 'center', 
             width: "133px",
             height: "133px",
-        }
+        },
+        historyButton: {
+            borderWidth: 2,
+            borderColor: 'black',
+            borderRadius: 10,
+            backgroundColor: 'white',
+            padding: 10,
+            paddingHorizontal: 20,
+        },
+        exerciseText: {
+            fontSize: 12,
+            color: '#1f96ff'
+        },
+
 
 })
 
@@ -109,6 +129,14 @@ export default function home() {
                     justifyContent: 'center' 
                     }}>
 
+                        <Link href='history' asChild>
+                            <TouchableOpacity>
+                                <View style={styles.historyButton}>
+                                    <Text style={{fontWeight:'bold'}}>History</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </Link>
+
                     <View style={styles.templateContainer}>
 
                         {/* 
@@ -131,7 +159,7 @@ export default function home() {
                                     data={template1}
                                     renderItem={({ item }) => (
                                         <View>
-                                            <Text>{item.workoutName}</Text>
+                                            <Text style={styles.exerciseText}>{item.workoutName}</Text>
 
                                         </View>
                                     )}
@@ -149,7 +177,7 @@ export default function home() {
                                         data={template2}
                                         renderItem={({ item }) => (
                                             <View>
-                                                <Text>{item.workoutName}</Text>
+                                                <Text style={styles.exerciseText    }>{item.workoutName}</Text>
 
                                             </View>
                                         )}
@@ -158,14 +186,6 @@ export default function home() {
                                 ) : (
                                     <Text>Loading...</Text>
                                 )}
-                            </Pressable>
-
-                            <Pressable style={styles.templateBox} onPress={() => setModalVisible3(true)}>
-                                    <Text style={styles.templateText}>Template 3</Text>
-                            </Pressable>
-
-                            <Pressable style={styles.templateBox} onPress={() => setModalVisible4(true)}>
-                                    <Text style={styles.templateText}>Template 4</Text>
                             </Pressable>
 
                     </View>
@@ -216,7 +236,6 @@ export default function home() {
                                         <TouchableOpacity
                                         onPress={() => {
                                             setModalVisible1(false);
-                                            console.log("This is template1" + template1);
                                             router.push({
                                                 pathname: '/workout/[template]',
                                                 params: { templateId: 1 }
@@ -264,85 +283,18 @@ export default function home() {
 
                                         <Text style={styles.templateText}>{template2[0]?.templateName}</Text>
 
-                                        <Text style={styles.templateText}>Start</Text>
-                                        
-                                    </View>
+                                        <TouchableOpacity
+                                        onPress={() => {
+                                            setModalVisible2(false);
+                                            router.push({
+                                                pathname: '/workout/[template]',
+                                                params: { templateId: 2 }
+                                            });
+                                        }}>
 
-                                </View>
-                            </View>
-                        </Modal>
+                                            <Text style={styles.templateText}>Start</Text>
 
-                        <Modal
-                            animationType="slide"
-                            transparent={true}
-                            visible={modalVisible3}
-                            onRequestClose={() => {
-                            Alert.alert("Modal has been closed.");
-                            setModalVisible3(!modalVisible3);
-                            }}
-                        >
-                            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                                <View style={styles.modalView}>
-
-                                    <View style={
-                                        {
-                                            flexDirection: 'row',
-                                            gap: 75,
-                                            display: "flex",
-                                            width: "100%", 
-                                            height: "auto", 
-                                            marginBottom: "5%", 
-                                            marginTop: "5%",
-                                            }}>
-
-                                        <Pressable onPress={() => setModalVisible3(false)}>
-                                            <Image source={
-                                                require("../assets/images/x_icon.png")} 
-                                                style={{height: 25, width: 25}}/>
-                                        </Pressable>
-
-                                        <Text style={styles.templateText}>Template 3</Text>
-
-                                        <Text style={styles.templateText}>Start</Text>
-                                        
-                                    </View>
-
-                                </View>
-                            </View>
-                        </Modal>
-
-                        <Modal
-                            animationType="slide"
-                            transparent={true}
-                            visible={modalVisible4}
-                            onRequestClose={() => {
-                            Alert.alert("Modal has been closed.");
-                            setModalVisible4(!modalVisible4);
-                            }}
-                        >
-                            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                                <View style={styles.modalView}>
-
-                                    <View style={
-                                        {
-                                            flexDirection: 'row',
-                                            gap: 75,
-                                            display: "flex",
-                                            width: "100%", 
-                                            height: "auto", 
-                                            marginBottom: "5%", 
-                                            marginTop: "5%",
-                                            }}>
-
-                                        <Pressable onPress={() => setModalVisible4(false)}>
-                                            <Image source={
-                                                require("../assets/images/x_icon.png")} 
-                                                style={{height: 25, width: 25}}/>
-                                        </Pressable>
-
-                                        <Text style={styles.templateText}>Template 4</Text>
-
-                                        <Text style={styles.templateText}>Start</Text>
+                                        </TouchableOpacity>
                                         
                                     </View>
 
