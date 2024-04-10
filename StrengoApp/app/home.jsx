@@ -14,12 +14,11 @@ import {
     Modal,
     Image,
     FlatList, } from 'react-native'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { Link, router } from 'expo-router'
 import { StrengoContext } from '../global/AppContext.js'
-import databaseHelper from '../service/databasehelper.js'
 
 const styles = StyleSheet.create({
 
@@ -106,23 +105,39 @@ export default function home() {
     const [modalVisible1, setModalVisible1] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
     const [modalVisible3, setModalVisible3] = useState(false);
-    const [modalVisible4, setModalVisible4] = useState(false);
+
+    /**
+     * Fetching the values from the StrengoContext.
+     */
     const {
         template1,
         setTemplate1,
         template2,
         setTemplate2,
+        template3,
+        setTemplate3,
         isLoading,
         setIsLoading,
       } = useContext(StrengoContext);
     
+      /**
+       * Prevents errors if the data is not yet fetched.
+       */
       if (isLoading) {
         return <Text>Loading...</Text>;
       }
 
     return (
+        /**
+         * Wrap the components in the StrengoContext.Provider to provide the values to the linked routes.
+         */
         <StrengoContext.Provider value={{ template1, template2, isLoading }}>
             {/*Use SafeAreaView to avoid the notch on the most new iphone*/}
+
+            {/**
+             * Button for the history page
+             */}
+             
             <SafeAreaView style={{
                     display: 'flex', 
                     alignItems: 'center', 
@@ -175,6 +190,24 @@ export default function home() {
                                 {template2 ? (
                                     <FlatList
                                         data={template2}
+                                        renderItem={({ item }) => (
+                                            <View>
+                                                <Text style={styles.exerciseText    }>{item.workoutName}</Text>
+
+                                            </View>
+                                        )}
+                                        keyExtractor={(item, index) => index}
+                                    />
+                                ) : (
+                                    <Text>Loading...</Text>
+                                )}
+                            </Pressable>
+
+                            <Pressable style={styles.templateBox} onPress={() => setModalVisible3(true)}>
+                                    {!isLoading && <Text style={styles.templateText}>{template3[0]?.templateName}</Text>}
+                                {template3 ? (
+                                    <FlatList
+                                        data={template3}
                                         renderItem={({ item }) => (
                                             <View>
                                                 <Text style={styles.exerciseText    }>{item.workoutName}</Text>
@@ -289,6 +322,57 @@ export default function home() {
                                             router.push({
                                                 pathname: '/workout/[template]',
                                                 params: { templateId: 2 }
+                                            });
+                                        }}>
+
+                                            <Text style={styles.templateText}>Start</Text>
+
+                                        </TouchableOpacity>
+                                        
+                                    </View>
+
+                                </View>
+                            </View>
+                        </Modal>
+
+                        <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalVisible3}
+                            onRequestClose={() => {
+                            Alert.alert("Modal has been closed."); 
+                            setModalVisible3(!modalVisible3);
+                            }}
+                        >
+                            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                                <View style={styles.modalView}>
+
+                                    <View style={
+                                        {
+                                            flexDirection: 'row',
+                                            gap: 75,
+                                            display: "flex",
+                                            width: "100%", 
+                                            height: "auto", 
+                                            marginBottom: "5%", 
+                                            marginTop: "5%",
+                                            }}>
+
+                                        <Pressable onPress={() => setModalVisible3(false)}>
+                                            <Image source={
+                                                require("../assets/images/x_icon.png")} 
+                                                style={{height: 25, width: 25}}/>
+                                        </Pressable>
+
+                                        <Text style={styles.templateText}>{template3[0]?.templateName}</Text>
+
+                                            
+                                        <TouchableOpacity
+                                        onPress={() => {
+                                            setModalVisible3(false);
+                                            router.push({
+                                                pathname: '/workout/[template]',
+                                                params: { templateId: 3 }
                                             });
                                         }}>
 

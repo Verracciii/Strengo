@@ -49,6 +49,11 @@ const styles = StyleSheet.create({
 })
 
 export default function workoutFinished () {
+
+  /**
+   * Fetches the dynamic URL parameters from the URL.
+   * The templateId is used to fetch the workout data from the database.
+   */
   const { templateId } = useLocalSearchParams(templateId);
   const [workoutData, setWorkoutData] = useState([]);
   console.log('templateId', templateId);
@@ -58,6 +63,9 @@ export default function workoutFinished () {
     
     console.log('Fetching workout data');
 
+    /**
+     * Asynchronously fetches the finished sets of a workout from the WorkoutHistory table.
+     */
     async function getWorkoutData(templateId) {
       const workoutData = await databaseHelper.customQuery('SELECT WorkoutHistory.*, Workouts.workoutName FROM WorkoutHistory INNER JOIN Workouts ON WorkoutHistory.workoutId = Workouts.workoutId WHERE WorkoutHistory.templateId = ?', Number(templateId));
       setWorkoutData(workoutData);
@@ -85,6 +93,9 @@ export default function workoutFinished () {
           <Text style={styles.workoutFinished.text}>Workout Finished</Text>
         </View>
 
+          {/**
+           * Maps over the workout data and displays the workout name.
+           */}
           <FlatList 
           data={workoutData}
           renderItem={({ item }) => {

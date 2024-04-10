@@ -19,16 +19,14 @@ Only the use of promises in initDatabase is directly from Copilot,
 the rest of the promise work is written by me.
 */
 
-/**
- * Helper object for interacting with the database.
- * @typedef {Object} databaseHelper
- * @property {Function} initDatabase - Initializes the database by creating tables and inserting initial data.
- * @property {Function} insertWorkout - Inserts a new workout into the Workouts table.
- * @property {Function} insertWorkoutTemplate - Inserts a new workout template into the Templates table.
- * @property {Function} readDb - Reads data from the Workouts and Templates tables.
- * @property {Function} readTemplates - Reads data from the Templates table with a custom SQL query.
- */
+
 const databaseHelper = {
+  
+
+  /**
+   * Initializes the database by creating necessary tables and inserting initial data.
+   * @returns {Promise} A promise that resolves if the initialization is successful, and rejects if there is an error.
+   */
   initDatabase: () => {
     return new Promise((resolve, reject) => {
       db.transaction((tx) => {
@@ -98,7 +96,9 @@ const databaseHelper = {
           "Chest Flies",
           "Russian Twists",
           "Tricep Dips",
-          "Calf Raises"
+          "Calf Raises",
+          "Sit-ups",
+          "Leg Raises",
         ];
 
         const workoutTypes = [
@@ -129,6 +129,8 @@ const databaseHelper = {
         databaseHelper.insertWorkout(workoutNames[12], workoutTypes[0]);
         databaseHelper.insertWorkout(workoutNames[13], workoutTypes[1]);
         databaseHelper.insertWorkout(workoutNames[14], workoutTypes[3]);
+        databaseHelper.insertWorkout(workoutNames[15], workoutTypes[0]);
+        databaseHelper.insertWorkout(workoutNames[16], workoutTypes[0]);
 
         
         /*

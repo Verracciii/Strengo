@@ -1,7 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useContext } from 'react'
 import { Link } from 'expo-router'
-import databaseHelper from '../service/databasehelper.js'
 import { StrengoContext } from '../global/AppContext.js'
 
 const styles = StyleSheet.create({
@@ -28,27 +27,28 @@ const styles = StyleSheet.create({
 
 
 export default function Index() {
-
-  //Github copilot gave me the knowledge to fix my error regarding using async functions in useEffect
-  //The previous error was that await functions returned a promise, and useEffect does not support promises/returning anything (except clean up)
-  //Now the initiliasing of the db is wrapped in an async function, this async function does not return anything.
-  //asyncInitDb is also local to the scope of UseEffect.
-  //The [] at the end of useEffect is an empty dependency array, this means that the useEffect will only run once, when the component mounts.
   
+  /**
+   * The useContext hook is used to access the values of the StrengoContext.
+   * This allows the use of the template1, template2, and isLoading values.
+   */
   const {
     template1,
-    setTemplate1,
     template2,
-    setTemplate2,
     isLoading,
-    setIsLoading,
   } = useContext(StrengoContext);
 
+  /**
+   * If the data is still loading, a loading message is displayed. This prevents errors from occurring when the data is not yet fetched.
+   */
   if (isLoading) {
     return <Text>Loading...</Text>;
   }
 
   return (
+    /**
+     * The StrengoContext.Provider provides the values to the linked routes.
+     */
     <StrengoContext.Provider value={{ template1, template2, isLoading }}>
       <View style={styles.container}>
 
