@@ -1,6 +1,4 @@
 import { Stack } from "expo-router"
-import HomeScreen from "./home"
-import NewWorkout from "./workout/[template]"
 import { StrengoProvider } from "../global/AppContext"
 
 const RootLayout = () => {
