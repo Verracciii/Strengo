@@ -1,11 +1,3 @@
-{/* 
-Todo:
-Create a stylesheet file
-Look into routing and understand it better
-Look into how to better implement multiple modals
-Look into and utilise SQLite
-*/}
-
 import { 
     View, 
     Text, 
